@@ -1,98 +1,201 @@
-function existeClienteConDNI (dni) {
+/** GUARDAR ARRAYS */
 
-    let encontrado = false;
+// Guardar array
 
-    for(const cliente of listaClientes) {
+// const array = [1, 2, 3, 4];
+//
+// localStorage.setItem("array", array);
 
-        if(cliente.dni === dni) {
-            encontrado = true;
-        }
+// Obtener array
+
+// const arrayString = localStorage.getItem("array");
+// const array = arrayString.split(",");
+//
+// console.log(array);
+
+/** BORRAR ELEMENTOS */
+
+// Remove item
+
+// localStorage.removeItem("array");
+
+// const frase = localStorage.getItem("frase");
+// console.log(frase);
+
+// Clear
+
+// localStorage.clear();
+
+/** ALMACENAR OBJETOS */
+
+// const persona = {
+//     nombre: "Juan",
+//     apellido: "Perez",
+//     edad: 30,
+//     encontrado: true,
+// };
+//
+// const personaJSON = JSON.stringify(persona);
+//
+// localStorage.setItem("persona", personaJSON);
+
+// Obtener el objeto
+
+// const personaJSON = localStorage.getItem("persona");
+//
+// const persona = JSON.parse(personaJSON);
+//
+// console.log(persona);
+
+/** ARRAY DE OBJETOS */
+
+// class Persona {
+//
+//     constructor(nombre, apellido, edad) {
+//         this.nombre = nombre;
+//         this.apellido = apellido;
+//         this.edad = edad;
+//     }
+// }
+//
+// const listaDePersonas = [];
+// listaDePersonas.push(new Persona("Juan", "Perez", 30));
+// listaDePersonas.push(new Persona("Alberto", "Fernandez", 40));
+// listaDePersonas.push(new Persona("Gabriel", "Jesús", 25));
+//
+// const json = JSON.stringify(listaDePersonas);
+//
+// localStorage.setItem("lista_de_personas", json);
+
+// Obtener
+
+// const json = localStorage.getItem("lista_de_personas");
+//
+// const listaDePersonas = JSON.parse(json);
+//
+// console.log(listaDePersonas);
+
+/** EJEMPLO */
+
+function guardarProductoEnLocalStorage (producto) {
+
+    // Traigo en localStorage
+    const productosEnLS = localStorage.getItem("productos");
+
+    if(productosEnLS !== null) {
+
+        // Parseo lo que tengo en localStorage
+        const productos = JSON.parse(productosEnLS);
+
+        // Encuentro el índice en donde se encuentra el elemento a buscar
+        const indiceProductoEncontrado = productos.findIndex( (elemento) => {
+            return elemento.nombre === producto.nombre;
+        });
+
+        // Utilizo el índice buscado para pisar el stock por el que tiene el nuevo producto
+        productos[indiceProductoEncontrado].stock = producto.stock;
+
+        // Vuelvo a cambiar el localStorage
+        localStorage.setItem("productos", JSON.stringify(productos));
+
+        // Renderizar tabla
+        renderizarTabla(productos);
+    }
+}
+
+function renderizarTabla (productos) {
+
+    const bodyTabla = document.getElementById("body_productos");
+
+    // Limpio body de la tabla
+    bodyTabla.innerHTML = "";
+
+    for(const producto of productos) {
+
+        // Creo la fila
+        const tr = document.createElement("tr");
+
+        // Columna nombre
+        const td1 = document.createElement("td");
+        td1.innerText = producto.nombre;
+
+        // Columna stock
+        const td2 = document.createElement("td");
+        td2.innerText = producto.stock;
+
+        // Columna acciones
+        const td3 = document.createElement("td");
+
+        // Creo los botones
+        const botonSumarStock = document.createElement("button");
+        botonSumarStock.innerText = "+";
+        const botonRestarStock = document.createElement("button");
+        botonRestarStock.innerText = "-";
+
+        // Agregar eventos del botón
+        botonSumarStock.addEventListener("click", () => {
+            producto.stock += 1;
+
+            guardarProductoEnLocalStorage(producto);
+        });
+
+        botonRestarStock.addEventListener("click", () => {
+            producto.stock -= 1;
+
+            guardarProductoEnLocalStorage(producto);
+        });
+
+        // Agregar botones a la columna "Acciones"
+        td3.append(botonSumarStock);
+        td3.append(botonRestarStock);
+
+        tr.append(td1);
+        tr.append(td2);
+        tr.append(td3);
+
+        // Agregar tr al body
+        bodyTabla.append(tr);
     }
 
-    return encontrado;
 }
 
-function clienteTieneSaldo (dniCliente, monto) {
+let productos = [];
 
-    let clienteEncontrado = buscarClientePorDNI(dniCliente);
+// Chequeo si tengo productos en localStorage
+const productosStorage = localStorage.getItem("productos");
 
-    return (parseInt(clienteEncontrado.saldo) >= parseInt(monto));
+if(productosStorage !== null) {
+    productos = JSON.parse(productosStorage);
 }
 
-function buscarClientePorDNI (dni) {
+// Detectamos evento SUBMIT de formulario
+const formularioAgregarProducto = document.getElementById("formulario_agregar_producto");
+formularioAgregarProducto.addEventListener("submit", (e) => {
 
-    let clienteEncontrado;
+    e.preventDefault();
 
-    for(let i = 0; i < listaClientes.length; i++) {
+    // Obtengo nombre y stock
+    const inputNombreProducto = document.getElementById("nombre_producto");
+    const inputStockProducto = document.getElementById("stock_producto");
 
-        if(listaClientes[i].dni === dni) {
-            clienteEncontrado = listaClientes[i];
-            break;
-        }
+    const nombreProducto = inputNombreProducto.value;
+    const stockProducto = inputStockProducto.value;
 
-    }
+    // Limpiar inputs
+    inputNombreProducto.value = "";
+    inputStockProducto.value = "";
 
-    return clienteEncontrado;
-}
+    // Agrego producto al array y luego al localStorage
+    productos.push({
+        nombre: nombreProducto,
+        stock: parseInt(stockProducto),
+    });
 
-class Cliente {
+    localStorage.setItem("productos", JSON.stringify(productos));
 
-    constructor (nombre, dni, saldo) {
-        this.nombre = nombre;
-        this.dni = dni;
-        this.saldo = saldo;
-    }
+    // Renderizar tabla
+    renderizarTabla(productos);
+});
 
-    descontarSaldo (saldo) {
-        this.saldo = this.saldo - saldo;
-    }
-
-    sumarSaldo (saldo) {
-        this.saldo = this.saldo + saldo;
-    }
-}
-
-const listaClientes = [];
-
-listaClientes.push(new Cliente("Mateo", "1122", 5000));
-listaClientes.push(new Cliente("Juan", "2233", 8000));
-listaClientes.push(new Cliente("Gonzalo", "4455", 9000));
-
-// Ingreso DNI de la persona DESDE la que quiero transferir
-let dniDesde = prompt("Ingrese el DNI de la persona desde la cual quiere transferir");
-
-while(!existeClienteConDNI(dniDesde)) {
-    dniDesde = prompt("DNI no encontrado, ingreselo nuevamente");
-}
-
-// Ingeso DNI de la persona a la cual quiero transferirle
-
-let dniHasta = prompt("Ingrese el DNI de la persona a la cual quiere transferir");
-
-while(!existeClienteConDNI(dniHasta)) {
-    dniHasta = prompt("DNI no encontrado, ingreselo nuevamente");
-}
-
-// Monto que quiero transferir
-
-let montoATransferir = parseInt(prompt("Ingrese el monto a transferir"));
-
-while(montoATransferir <= 0 || !clienteTieneSaldo(dniDesde, montoATransferir)) {
-    montoATransferir = parseInt(prompt("Monto inválido, vuelva a ingresarlo"));
-}
-
-// Descontar y acreditar saldo de los clientes
-
-const clienteDesde = buscarClientePorDNI(dniDesde);
-const clienteHasta = buscarClientePorDNI(dniHasta);
-
-clienteDesde.descontarSaldo(montoATransferir);
-clienteHasta.sumarSaldo(montoATransferir);
-
-alert("Se transfirió " + montoATransferir);
-alert(dniHasta + " recibió una transferencia de " + montoATransferir);
-
-console.log(clienteDesde);
-console.log(clienteHasta);
-
-console.log(listaClientes);
+// Renderizar los productos por primera vez
+renderizarTabla(productos);

@@ -7,8 +7,30 @@
     <title>Document</title>
 </head>
 <body>
+    <h1>Agregar producto</h1>
+    <form id="formulario_agregar_producto">
     
-
+        <input type="text" id="nombre_producto" autocomplete="off" />
+        <input type="number" id="stock_producto" autocomplete="off" />
+    
+        <button type="submit">Agregar producto</button>
+    </form>
+    
+    <table id="tabla_productos">
+    
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Stock</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+    
+        <tbody id="body_productos">
+    
+        </tbody>
+    
+    </table>
     <script src="scripts.js"></script>
 </body>
 </html>
